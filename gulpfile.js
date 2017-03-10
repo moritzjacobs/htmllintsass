@@ -16,7 +16,7 @@ var onErrorCSS = function (err) {
 
 // Styles tasks
 gulp.task('css', function () {
-	return gulp.src('*.scss')
+	return gulp.src(['*.scss', 'badexample/*.scss'])
 		.pipe(plugins.plumber({
 			errorHandler: onErrorCSS
 		}))
@@ -27,7 +27,9 @@ gulp.task('css', function () {
 		}))
 		.pipe(plugins.autoprefixer('last 2 version'))
 		.pipe(plugins.sourcemaps.write('.'))
-		.pipe(gulp.dest('./'))
+		.pipe(gulp.dest(function(file) {
+			return file.base;
+		}))
 		.pipe(plugins.notify({
 			message: 'Styles compiled'
 		}));
@@ -35,7 +37,7 @@ gulp.task('css', function () {
 });
 
 gulp.task('css:clean', function (cb) {
-	del(['*.map'], {
+	del(['**/*.map'], {
 		force: true
 	}, cb);
 });
@@ -47,7 +49,7 @@ gulp.task('css:dist', function () {
 
 // watch tasks
 gulp.task('watch', function () {
-	gulp.watch('*', ['css']);
+	gulp.watch('**/*.scss', ['css']);
 });
 
 // default tasks

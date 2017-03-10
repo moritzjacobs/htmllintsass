@@ -1,4 +1,16 @@
 /*
+
+
+## Highlighting mixin
+
+HTML elements that are "empty" (as in XML <foo/>, e.g. <img/> and <input/>)
+can not show the warning message with ::after, so the message is added as
+the content property of that element. They are then only bordered in purple.
+All others are red and show a warning on :hover.
+
+*/
+/*
+
 When HTML is written incorrectly, nothing much happens.
 Because of this, it's easy to have invalid, unsemantic, or
 unaccessible bits in markup without it being obvious.
@@ -10,8 +22,8 @@ integrated into a development workflow, is to use some slightly
 advanced CSS selectors to highlight potential problem areas.
 Here are a few things we can use CSS selectors to help us catch
 out.
-*/
-/*
+
+
 ## Inline Styles
 
 This selector will target any element on the page that has
@@ -25,13 +37,15 @@ basis.
 With the problem elements selected, we can apply any style to
 make them more visibly obvious on the page, e.g. a big red
 border.
+
 */
 *[style] {
-    border: 2px solid red;
+    content: "inline styles" !important;
+    border: 2px solid red !important;
     position: relative;
 }
 
-*[style]:after {
+*[style]::after {
     content: "inline styles";
     position: absolute;
     top: 0;
@@ -53,24 +67,28 @@ border.
 }
 
 /*
+
+
 ## Faulty or Missing Link Targets
 
 These selectors will highlight any anchor elements that
 either do not have any href attribute at all, or have a
 meaningless one.
+
 */
-a:not([href])
+a:not([href]),
 a[href="#"],
 a[href=""],
 a[href*="javascript:void(0)"] {
-    border: 2px solid red;
+    content: "faulty or missing link target" !important;
+    border: 2px solid red !important;
     position: relative;
 }
 
-a:not([href])
-a[href="#"]:after,
-a[href=""]:after,
-a[href*="javascript:void(0)"]:after {
+a:not([href])::after,
+a[href="#"]::after,
+a[href=""]::after,
+a[href*="javascript:void(0)"]::after {
     content: "faulty or missing link target";
     position: absolute;
     top: 0;
@@ -87,7 +105,7 @@ a[href*="javascript:void(0)"]:after {
     display: none;
 }
 
-a:not([href])
+a:not([href]):hover:after,
 a[href="#"]:hover:after,
 a[href=""]:hover:after,
 a[href*="javascript:void(0)"]:hover:after {
@@ -95,40 +113,24 @@ a[href*="javascript:void(0)"]:hover:after {
 }
 
 /*
+
+
 ## Unaccessible Images
 
 As a blanket rule, all images should have an alt attribute.
 When this attribute is missing, most screenreaders will read
 out the value of the src attribute instead which, of course, is
 not useful to the user and can in fact be confusing.
+
 */
 img:not([alt]) {
-    border: 2px solid red;
+    content: "unaccessible image" !important;
+    border: 2px solid purple !important;
     position: relative;
 }
 
-img:not([alt]):after {
-    content: "unaccessible image";
-    position: absolute;
-    top: 0;
-    right: 0;
-    -webkit-transform: translate(-50%, -100%);
-            transform: translate(-50%, -100%);
-    color: white;
-    font-family: monospace;
-    font-weight: bold;
-    background: red;
-    padding: 3px;
-    border-radius: 3px;
-    font-size: 10px;
-    display: none;
-}
-
-img:not([alt]):hover:after {
-    display: block;
-}
-
 /*
+
 It should be noted that the above selector will not select
 images with a null/empty alt attribute, i.e. images with alt="".
 This is because a null alt attribute can be an intentional way
@@ -136,71 +138,34 @@ of having a screen reader skip over the image, which is useful
 if, for example, the image is purely decorative. It could,
 however, still be useful to have these highlighted, which we can
 do with the following selector -
+
 */
 img[alt=""] {
-    border: 2px solid red;
+    content: "unaccessible image" !important;
+    border: 2px solid purple !important;
     position: relative;
 }
 
-img[alt=""]:after {
-    content: "unaccessible image";
-    position: absolute;
-    top: 0;
-    right: 0;
-    -webkit-transform: translate(-50%, -100%);
-            transform: translate(-50%, -100%);
-    color: white;
-    font-family: monospace;
-    font-weight: bold;
-    background: red;
-    padding: 3px;
-    border-radius: 3px;
-    font-size: 10px;
-    display: none;
-}
-
-img[alt=""]:hover:after {
-    display: block;
-}
-
 /*
+
+
 ## Missing Document Language
 
 An important attribute that should be present on all html
 elements is the language attribute. This attribute is a signal
 to screen readers what language the page is in, which can
 determine how the content of the page is read aloud.
+
 */
 html:not([lang]),
 html[lang=""] {
-    border: 2px solid red;
+    content: "missing document language" !important;
+    border: 2px solid purple !important;
     position: relative;
 }
 
-html:not([lang]):after,
-html[lang=""]:after {
-    content: "missing document language";
-    position: absolute;
-    top: 0;
-    right: 0;
-    -webkit-transform: translate(-50%, -100%);
-            transform: translate(-50%, -100%);
-    color: white;
-    font-family: monospace;
-    font-weight: bold;
-    background: red;
-    padding: 3px;
-    border-radius: 3px;
-    font-size: 10px;
-    display: none;
-}
-
-html:not([lang]):hover:after,
-html[lang=""]:hover:after {
-    display: block;
-}
-
 /*
+
 
 ## Incorrect Character Set
 
@@ -212,63 +177,27 @@ valid HTML.
 
 */
 meta[charset]:not([charset="UTF-8"]) {
-    border: 2px solid red;
+    content: "incorrect character set" !important;
+    border: 2px solid purple !important;
     position: relative;
 }
 
-meta[charset]:not([charset="UTF-8"]):after {
-    content: "incorrect character set";
-    position: absolute;
-    top: 0;
-    right: 0;
-    -webkit-transform: translate(-50%, -100%);
-            transform: translate(-50%, -100%);
-    color: white;
-    font-family: monospace;
-    font-weight: bold;
-    background: red;
-    padding: 3px;
-    border-radius: 3px;
-    font-size: 10px;
-    display: none;
-}
-
-meta[charset]:not([charset="UTF-8"]):hover:after {
-    display: block;
-}
-
 /*
+
 Ideally, this tag should also be the first element after the
 opening <head> tag. We can check for this using the following
 selector -
+
 */
 meta[charset]:not(:first-child) {
-    border: 2px solid red;
+    content: "charset metatag should be first element in head" !important;
+    border: 2px solid purple !important;
     position: relative;
 }
 
-meta[charset]:not(:first-child):after {
-    content: "charset metatag should be first element in &lt;head&gt;";
-    position: absolute;
-    top: 0;
-    right: 0;
-    -webkit-transform: translate(-50%, -100%);
-            transform: translate(-50%, -100%);
-    color: white;
-    font-family: monospace;
-    font-weight: bold;
-    background: red;
-    padding: 3px;
-    border-radius: 3px;
-    font-size: 10px;
-    display: none;
-}
-
-meta[charset]:not(:first-child):hover:after {
-    display: block;
-}
-
 /*
+
+
 ## Unaccessible Viewport Attributes
 
 This selector can be used to highlight unaccessible viewport
@@ -281,36 +210,13 @@ maximum-scale, or minimum-scale should never be used.
 meta[name="viewport"][content*="user-scalable=no"],
 meta[name="viewport"][content*="maximum-scale"],
 meta[name="viewport"][content*="minimum-scale"] {
-    border: 2px solid red;
+    content: "unaccessible viewport attributes" !important;
+    border: 2px solid purple !important;
     position: relative;
 }
 
-meta[name="viewport"][content*="user-scalable=no"]:after,
-meta[name="viewport"][content*="maximum-scale"]:after,
-meta[name="viewport"][content*="minimum-scale"]:after {
-    content: "unaccessible viewport attributes";
-    position: absolute;
-    top: 0;
-    right: 0;
-    -webkit-transform: translate(-50%, -100%);
-            transform: translate(-50%, -100%);
-    color: white;
-    font-family: monospace;
-    font-weight: bold;
-    background: red;
-    padding: 3px;
-    border-radius: 3px;
-    font-size: 10px;
-    display: none;
-}
-
-meta[name="viewport"][content*="user-scalable=no"]:hover:after,
-meta[name="viewport"][content*="maximum-scale"]:hover:after,
-meta[name="viewport"][content*="minimum-scale"]:hover:after {
-    display: block;
-}
-
 /*
+
 
 ## Unlabelled Form Elements
 
@@ -326,41 +232,18 @@ using the for attribute.
 input:not([id]),
 select:not([id]),
 textarea:not([id]) {
-    border: 2px solid red;
+    content: "unlabeled form element" !important;
+    border: 2px solid purple !important;
     position: relative;
-}
-
-input:not([id]):after,
-select:not([id]):after,
-textarea:not([id]):after {
-    content: "unlabeled form element";
-    position: absolute;
-    top: 0;
-    right: 0;
-    -webkit-transform: translate(-50%, -100%);
-            transform: translate(-50%, -100%);
-    color: white;
-    font-family: monospace;
-    font-weight: bold;
-    background: red;
-    padding: 3px;
-    border-radius: 3px;
-    font-size: 10px;
-    display: none;
-}
-
-input:not([id]):hover:after,
-select:not([id]):hover:after,
-textarea:not([id]):hover:after {
-    display: block;
 }
 
 label:not([for]) {
-    border: 2px solid red;
+    content: "label not linked to input element" !important;
+    border: 2px solid red !important;
     position: relative;
 }
 
-label:not([for]):after {
+label:not([for])::after {
     content: "label not linked to input element";
     position: absolute;
     top: 0;
@@ -382,56 +265,37 @@ label:not([for]):hover:after {
 }
 
 /*
+
 Another type of labelling that is important for form elements is
 via the name attribute. While the id attribute is used for
 labelling the element in the context of the HTML document, the
 name attribute is used to reference the the element when
 submitted with the form data.
+
 */
 input:not([name]),
 select:not([name]),
 textarea:not([name]) {
-    border: 2px solid red;
+    content: "missing name attribute" !important;
+    border: 2px solid purple !important;
     position: relative;
 }
 
-input:not([name]):after,
-select:not([name]):after,
-textarea:not([name]):after {
-    content: "missing name attribute";
-    position: absolute;
-    top: 0;
-    right: 0;
-    -webkit-transform: translate(-50%, -100%);
-            transform: translate(-50%, -100%);
-    color: white;
-    font-family: monospace;
-    font-weight: bold;
-    background: red;
-    padding: 3px;
-    border-radius: 3px;
-    font-size: 10px;
-    display: none;
-}
-
-input:not([name]):hover:after,
-select:not([name]):hover:after,
-textarea:not([name]):hover:after {
-    display: block;
-}
-
 /*
+
 Additionally, besides the form elements themselves, it is
 useful to give the form element itself a name and/or id.
 This selector will highlight any form element that is missing
 both name and id attributes.
+
 */
 form:not([name]):not([id]) {
-    border: 2px solid red;
+    content: "missing name and id on form element" !important;
+    border: 2px solid red !important;
     position: relative;
 }
 
-form:not([name]):not([id]):after {
+form:not([name]):not([id])::after {
     content: "missing name and id on form element";
     position: absolute;
     top: 0;
@@ -454,6 +318,7 @@ form:not([name]):not([id]):hover:after {
 
 /*
 
+
 ## Empty Interactive Elements
 
 Interactive elements like links or buttons are typically
@@ -462,15 +327,17 @@ these elements using other methods, such as an aria-label
 attribute, having them be empty is likely a sign of something
 wrong. This selector will highlight any links of buttons that
 have no HTML content inside them.
+
 */
 button:empty,
 a:empty {
-    border: 2px solid red;
+    content: "empty interactive element" !important;
+    border: 2px solid red !important;
     position: relative;
 }
 
-button:empty:after,
-a:empty:after {
+button:empty::after,
+a:empty::after {
     content: "empty interactive element";
     position: absolute;
     top: 0;
@@ -493,38 +360,19 @@ a:empty:hover:after {
 }
 
 /*
+
+
 ## Unnecessary or Deprecated Attributes
 
 Finally, we can use CSS selectors to highlight attributes in our
 HTML that are deprecated or no longer needed.
+
 */
 script[type="text/javascript"],
 link[rel="stylesheet"][type="text/css"] {
-    border: 2px solid red;
+    content: "unnecessary or deprecated attribute" !important;
+    border: 2px solid purple !important;
     position: relative;
-}
-
-script[type="text/javascript"]:after,
-link[rel="stylesheet"][type="text/css"]:after {
-    content: "unnecessary or deprecated attribute";
-    position: absolute;
-    top: 0;
-    right: 0;
-    -webkit-transform: translate(-50%, -100%);
-            transform: translate(-50%, -100%);
-    color: white;
-    font-family: monospace;
-    font-weight: bold;
-    background: red;
-    padding: 3px;
-    border-radius: 3px;
-    font-size: 10px;
-    display: none;
-}
-
-script[type="text/javascript"]:hover:after,
-link[rel="stylesheet"][type="text/css"]:hover:after {
-    display: block;
 }
 
 /*# sourceMappingURL=lint.css.map */

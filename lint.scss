@@ -1,4 +1,50 @@
 /*
+
+
+## Highlighting mixin
+
+HTML elements that are "empty" (as in XML <foo/>, e.g. <img/> and <input/>)
+can not show the warning message with ::after, so the message is added as
+the content property of that element. They are then only bordered in purple.
+All others are red and show a warning on :hover.
+
+*/
+
+@mixin highlight($message:"lint failed: …", $is_empty:false) {
+	
+	$color: purple;
+
+	@if not $is_empty {
+		$color: red;
+
+		&::after {
+			content: $message;
+			position: absolute;
+			top: 0;
+			right: 0;
+			transform: translate(-50%, -100%);
+			color: white;
+			font-family: monospace;
+			font-weight: bold;
+			background: $color;
+			padding: 3px;
+			border-radius: 3px;
+			font-size: 10px;
+			display: none;
+		}
+
+		&:hover:after {
+			display: block;
+		}
+	}
+
+	content: $message !important;
+	border: 2px solid $color !important;
+	position: relative;
+}
+
+/*
+
 When HTML is written incorrectly, nothing much happens.
 Because of this, it's easy to have invalid, unsemantic, or
 unaccessible bits in markup without it being obvious.
@@ -10,34 +56,8 @@ integrated into a development workflow, is to use some slightly
 advanced CSS selectors to highlight potential problem areas.
 Here are a few things we can use CSS selectors to help us catch
 out.
-*/
 
-@mixin highlight($message:"lint failed: …") {
-	border: 2px solid red;
-	position: relative;
 
-	&:after {
-		content: $message;
-		position: absolute;
-		top: 0;
-		right: 0;
-		transform: translate(-50%, -100%);
-		color: white;
-		font-family: monospace;
-		font-weight: bold;
-		background: red;
-		padding: 3px;
-		border-radius: 3px;
-		font-size: 10px;
-		display: none;
-	}
-
-	&:hover:after {
-		display: block;
-	}
-}
-
-/*
 ## Inline Styles
 
 This selector will target any element on the page that has
@@ -51,6 +71,7 @@ basis.
 With the problem elements selected, we can apply any style to
 make them more visibly obvious on the page, e.g. a big red
 border.
+
 */
 
 *[style] {
@@ -58,35 +79,41 @@ border.
 }
 
 /*
+
+
 ## Faulty or Missing Link Targets
 
 These selectors will highlight any anchor elements that
 either do not have any href attribute at all, or have a
 meaningless one.
+
 */
 
-a:not([href]) 
-a[href="#"], 
-a[href=""], 
+a:not([href]),
+a[href="#"],
+a[href=""],
 a[href*="javascript:void(0)"] {
 	@include highlight("faulty or missing link target");
 } 
 
-
 /*
+
+
 ## Unaccessible Images
 
 As a blanket rule, all images should have an alt attribute.
 When this attribute is missing, most screenreaders will read
 out the value of the src attribute instead which, of course, is
 not useful to the user and can in fact be confusing.
+
 */
 
 img:not([alt]) {
-	@include highlight("unaccessible image");
+	@include highlight("unaccessible image", true);
 } 
 
 /*
+
 It should be noted that the above selector will not select
 images with a null/empty alt attribute, i.e. images with alt="".
 This is because a null alt attribute can be an intentional way
@@ -94,27 +121,32 @@ of having a screen reader skip over the image, which is useful
 if, for example, the image is purely decorative. It could,
 however, still be useful to have these highlighted, which we can
 do with the following selector -
+
 */
 
 img[alt=""] {
-	@include highlight("unaccessible image");
+	@include highlight("unaccessible image", true);
 } 
 
 /*
+
+
 ## Missing Document Language
 
 An important attribute that should be present on all html
 elements is the language attribute. This attribute is a signal
 to screen readers what language the page is in, which can
 determine how the content of the page is read aloud.
+
 */
 
 html:not([lang]), 
 html[lang=""] {
-	@include highlight("missing document language");
+	@include highlight("missing document language", true);
 } 
 
 /*
+
 
 ## Incorrect Character Set
 
@@ -127,20 +159,24 @@ valid HTML.
 */
 
 meta[charset]:not([charset="UTF-8"]) {
-	@include highlight("incorrect character set");
+	@include highlight("incorrect character set", true);
 } 
 
 /*
+
 Ideally, this tag should also be the first element after the
 opening <head> tag. We can check for this using the following
 selector -
+
 */
 
 meta[charset]:not(:first-child) {
-	@include highlight("charset metatag should be first element in &lt;head&gt;");
+	@include highlight("charset metatag should be first element in head", true);
 } 
 
 /*
+
+
 ## Unaccessible Viewport Attributes
 
 This selector can be used to highlight unaccessible viewport
@@ -150,13 +186,15 @@ shrinking and enlarging it. So, using user-scalable=no,
 maximum-scale, or minimum-scale should never be used.
 
 */
+
 meta[name="viewport"][content*="user-scalable=no"], 
 meta[name="viewport"][content*="maximum-scale"], 
 meta[name="viewport"][content*="minimum-scale"] {
-	@include highlight("unaccessible viewport attributes");
+	@include highlight("unaccessible viewport attributes", true);
 } 
 
 /*
+
 
 ## Unlabelled Form Elements
 
@@ -169,10 +207,11 @@ label elements that are not explicitly linked to a form element
 using the for attribute.
 
 */
+
 input:not([id]), 
 select:not([id]), 
 textarea:not([id]) {
-	@include highlight("unlabeled form element");
+	@include highlight("unlabeled form element", true);
 }
 
 label:not([for]) {
@@ -180,24 +219,28 @@ label:not([for]) {
 } 
 
 /*
+
 Another type of labelling that is important for form elements is
 via the name attribute. While the id attribute is used for
 labelling the element in the context of the HTML document, the
 name attribute is used to reference the the element when
 submitted with the form data.
+
 */
 
 input:not([name]), 
 select:not([name]), 
 textarea:not([name]) {
-	@include highlight("missing name attribute");
+	@include highlight("missing name attribute", true);
 } 
 
 /*
+
 Additionally, besides the form elements themselves, it is
 useful to give the form element itself a name and/or id.
 This selector will highlight any form element that is missing
 both name and id attributes.
+
 */
 
 form:not([name]):not([id]) {
@@ -205,6 +248,7 @@ form:not([name]):not([id]) {
 } 
 
 /*
+
 
 ## Empty Interactive Elements
 
@@ -214,6 +258,7 @@ these elements using other methods, such as an aria-label
 attribute, having them be empty is likely a sign of something
 wrong. This selector will highlight any links of buttons that
 have no HTML content inside them.
+
 */
 
 button:empty, 
@@ -221,17 +266,17 @@ a:empty {
 	@include highlight("empty interactive element");
 } 
 
-
 /*
+
+
 ## Unnecessary or Deprecated Attributes
 
 Finally, we can use CSS selectors to highlight attributes in our
 HTML that are deprecated or no longer needed.
+
 */
 
 script[type="text/javascript"], 
 link[rel="stylesheet"][type="text/css"] {
-	@include highlight("unnecessary or deprecated attribute");
+	@include highlight("unnecessary or deprecated attribute", true);
 } 
-
-
